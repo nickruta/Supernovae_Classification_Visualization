@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Supernovae Classification Visualization</title>
+<style>
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.banner {
+      width: 60%;
+    height: auto;
+}
+</style>
+<script src="resources/d3.min.js"></script>
+<script src="resources/jquery.min.js"></script>
+<body>
+  <p style="text-align:center;"><img class="banner" src="harvard_chile_banner.png" alt="Logo"></p>
+  <div id="figure" style="margin-bottom: 50px;margin-top:10px;text-align:center"></div>
+  <svg id="svg_object1" xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <linearGradient id="myLinearGradient1">
+        <stop id="stop11" />
+        <stop id="stop12" />
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="250" height="100" rx="10" ry="10" visibility="hidden"
+       style="fill:url(#myLinearGradient1);
+              stroke: #005000;
+              stroke-width: 3;" />
+  </svg>
+  <svg id="svg_object2" xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <linearGradient id="myLinearGradient2">
+        <stop id="stop21" />
+        <stop id="stop22" />
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="250" height="100" rx="10" ry="10" visibility="hidden"
+       style="fill:url(#myLinearGradient2);
+              stroke: #005000;
+              stroke-width: 3;" />
+  </svg>
+  <svg id="svg_object3" xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <linearGradient id="myLinearGradient3">
+        <stop id="stop31" />
+        <stop id="stop32" />
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="250" height="100" rx="10" ry="10" visibility="hidden"
+       style="fill:url(#myLinearGradient3);
+              stroke: #005000;
+              stroke-width: 3;" />
+  </svg>
+  <svg id="svg_object4" xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <defs>
+      <linearGradient id="myLinearGradient4">
+        <stop id="stop41" />
+        <stop id="stop42" />
+      </linearGradient>
+    </defs>
+
+    <rect x="10" y="10" width="250" height="100" rx="10" ry="10" visibility="hidden"
+       style="fill:url(#myLinearGradient4);
+              stroke: #005000;
+              stroke-width: 3;" />
+  </svg>
+  <svg id="svg_object5" xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <linearGradient id="myLinearGradient5">
+        <stop id="stop51" />
+        <stop id="stop52" />
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="250" height="100" rx="10" ry="10" visibility="hidden"
+       style="fill:url(#myLinearGradient5);
+              stroke: #005000;
+              stroke-width: 3;" />
+  </svg>
+  <script>
+  // EIGHT COLORS
+  // https://github.com/mwaskom/seaborn/blob/master/seaborn/palettes.py
+  // drop down to 2 values in raw_data
+  // http://www.color-hex.com/
+  // https://mdbootstrap.com/css/colors/
+
+  var margin = {top: 50, right: 20, bottom: 10, left: 65},
+      width = 800 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  var y = d3.scale.ordinal()
+      .rangeRoundBands([0, height], 0.3); // height of bars, second argument gives gap between
+
+  var x = d3.scale.linear()
+      .rangeRound([0, width]); // width of bars
+
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("top"); // generate axis
+
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left") 
+
+  var svg = d3.select("#figure").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("id", "d3-plot")
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var color = d3.scale.ordinal()
+      .range(["#f6a580", "url(#myLinearGradient1)", "#92c6db"]); // bar colors // #cccccc
+
+    color.domain(["Pwinner", "Ptension", "Prunnerup"]);
+
+    d3.csv("simulation_data/demo_t0.csv", function(error, data) {
+
+    data.forEach(function(d) {
+      // calc percentages
+      // d["reject"] = +d[1]*100/d.N;
+      d["Pwinner"] = +d[2]*100/d.N;
+      d["Ptension"] = +d[3]*100/d.N;
+      d["Prunnerup"] = +d[4]*100/d.N;
+      // d["Strongly agree"] = +d[5]*100/d.N;
+
+      var x0 = -1*(d["Ptension"]/2+d["Pwinner"]);
+      var idx = 1;
+      var idxx = 10;
+      d.boxes = color.domain().map(function(name) { return {name: d[idxx += 1], x0: x0, x1: x0 += +d[name], N: +d.N, n: +d[idx += 1], Tension: d["Tension"], P1: d[11], P2: d[13], IDX:d["IDX"]}; });
+
+    });
+
+    var min_val = d3.min(data, function(d) {
+            return d.boxes["0"].x0;
+            });
+
+    var max_val = d3.max(data, function(d) {
+            return d.boxes["2"].x1;
+            });
+
+    var min_val = -80
+    var max_val = 27
+
+    x.domain([min_val, max_val]).nice();
+    y.domain(data.map(function(d) { return d.Question; }));
+
+  // SHOWS X-Axis
+   // svg.append("g")
+   //     .attr("class", "x axis")
+   //     .call(xAxis); // add x axis
+
+   svg.append("g")
+       .attr("class", "y axis")
+       .style("font" ,"15px sans-serif")
+       .call(yAxis) // add y axis
+
+    var vakken = svg.selectAll(".question")
+        .data(data)
+      .enter().append("g")
+        .attr("class", "bar")
+        .attr("transform", function(d) { return "translate(0," + y(d.Question) + ")"; });
+
+    var bars = vakken.selectAll("rect")
+        .data(function(d) { return d.boxes; })
+      .enter().append("g").attr("class", "subbar");
+
+  // gross :-( we should use a loop below!
+    bars.append("rect")
+        .attr("height", y.rangeBand())
+        .attr("x", function(d) { return x(d.x0); })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0); })
+        .style("fill", function(d) {
+        
+        if (d["IDX"]==1) {
+          var a = document.getElementById("svg_object1");
+          var stop1 = a.getElementById("stop11");
+          var stop2 = a.getElementById("stop12");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient1)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        } 
+
+        if (d["IDX"]==2) {
+          var a = document.getElementById("svg_object2");
+          var stop1 = a.getElementById("stop21");
+          var stop2 = a.getElementById("stop22");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient2)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+        if (d["IDX"]==3) {
+          var a = document.getElementById("svg_object3");
+          var stop1 = a.getElementById("stop31");
+          var stop2 = a.getElementById("stop32");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient3)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+        if (d["IDX"]==4) {
+          var a = document.getElementById("svg_object4");
+          var stop1 = a.getElementById("stop41");
+          var stop2 = a.getElementById("stop42");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient4)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+        if (d["IDX"]==5) {
+          var a = document.getElementById("svg_object5");
+          var stop1 = a.getElementById("stop51");
+          var stop2 = a.getElementById("stop52");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient5)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+          }); // gross
+
+    color.domain(["II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+    color.range(["#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+
+    // bars.append("text")
+    //     .attr("x", function(d) { return x(d.x0); })
+    //     .attr("y", y.rangeBand()/2)
+    //     .attr("dy", "0.5em")
+    //     .attr("dx", "0.5em")
+    //     .style("font" ,"10px sans-serif")
+    //     .style("text-anchor", "begin")
+    //     .text(function(d) { return d.n !== 0 && (d.x1-d.x0)>3 ? d.n : "" });
+
+   bars.append("text")
+        .attr("x", function(d) {
+          if (d["x0"]<0) {
+            return x(d.x0-5.5);
+          } else {
+            return x(d.x1);
+          }
+        }) // x(d.x0) // NEW
+        .attr("y", y.rangeBand()/2)
+        .attr("dy", "0.5em")
+        .attr("dx", "0.5em")
+        .style("font" ,"12px sans-serif")
+        .style("text-anchor", "begin")
+        .text(function(d) { // NEW
+          if (d["name"]=="Tension") {
+            d.n = ""
+          } else {
+            d.n =  d.n + "%"
+          }
+          return d.n !== 0 && (d.x1-d.x0)>3 ? d.n : ""  // NEW
+        });
+
+    vakken.insert("rect",":first-child")
+        .attr("height", y.rangeBand())
+        .attr("x", "1")
+        .attr("width", width)
+        .attr("fill-opacity", "0.5")
+        .style("fill", "#F5F5F5")
+        .attr("class", function(d,index) { return index%2==0 ? "even" : "uneven"; });
+
+  // Shows the Y-Axis
+    // svg.append("g")
+    //    .attr("class", "y axis")
+    // .append("line")
+    //    .attr("x1", x(0))
+    //    .attr("x2", x(0))
+    //    .attr("y2", height);
+
+    var startp = svg.append("g").attr("class", "legendbox").attr("id", "mylegendbox");
+    // this is not nice, we should calculate the bounding box and use that
+    // var legend_tabs = [0, 60, 120, 180, 240, 300, 360, 420, 480];
+
+    var mult = 1.4
+    var legend_tabs = [mult*0, mult*60, mult*120, mult*180, mult*240, mult*300, mult*360, mult*420, mult*480];
+
+    var legend = startp.selectAll(".legend")
+        .data(color.domain().slice())
+      .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(" + legend_tabs[i] + ",-45)"; });
+
+    legend.append("rect")
+        .attr("x", 0)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", color);
+
+    legend.append("text")
+        .attr("x", 22)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "begin")
+        .style("font" ,"20px sans-serif")
+        .text(function(d) { return d; });
+
+    d3.selectAll(".axis path")
+        .style("fill", "none")
+        .style("stroke", "#000")
+        .style("shape-rendering", "crispEdges")
+
+    d3.selectAll(".axis line")
+        .style("fill", "none")
+        .style("stroke", "#000")
+        .style("shape-rendering", "crispEdges")
+
+    var movesize = width/2 - startp.node().getBBox().width/2;
+    d3.selectAll(".legendbox").attr("transform", "translate(" + movesize  + ",0)");
+  });
+
+  function update(rawDataFile) {
+    // remove the probability bars currently on the screen
+    $(".subbar").remove()
+
+    var margin = {top: 50, right: 20, bottom: 10, left: 65},
+      width = 800 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+    var y = d3.scale.ordinal()
+        .rangeRoundBands([0, height], 0.3); // height of bars, second argument gives gap between
+
+    var x = d3.scale.linear()
+        .rangeRound([0, width]); // width of bars
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("top"); // generate axis
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left") 
+
+    var color = d3.scale.ordinal()
+        .range(["#f6a580", "url(#myLinearGradient1)", "#92c6db"]); // bar colors // #cccccc
+
+    color.domain(["Pwinner", "Ptension", "Prunnerup"]);
+
+    d3.csv(rawDataFile, function(error, data) {
+
+    data.forEach(function(d) {
+      // calc percentages
+      d["Pwinner"] = +d[2]*100/d.N;
+      d["Ptension"] = +d[3]*100/d.N;
+      d["Prunnerup"] = +d[4]*100/d.N;
+
+      var x0 = -1*(d["Ptension"]/2+d["Pwinner"]);
+      var idx = 1;
+      var idxx = 10;
+      d.boxes = color.domain().map(function(name) { return {name: d[idxx += 1], x0: x0, x1: x0 += +d[name], N: +d.N, n: +d[idx += 1], Tension: d["Tension"], P1: d[11], P2: d[13], IDX:d["IDX"]}; });
+      });
+
+    var min_val = d3.min(data, function(d) {
+            return d.boxes["0"].x0;
+            });
+
+    var max_val = d3.max(data, function(d) {
+            return d.boxes["2"].x1;
+            });
+
+    var min_val = -80
+    var max_val = 27
+
+    x.domain([min_val, max_val]).nice();
+    y.domain(data.map(function(d) { return d.Question; }));
+
+    var vakken = svg.selectAll(".question")
+        .data(data)
+      .enter().append("g")
+        .attr("class", "bar")
+        .attr("transform", function(d) { return "translate(0," + y(d.Question) + ")"; });
+
+    var bars = vakken.selectAll("rect")
+        .data(function(d) { return d.boxes; })
+      .enter().append("g").attr("class", "subbar");
+
+    // gross :( we should use a loop here!
+    bars.append("rect")
+        .attr("height", y.rangeBand())
+        .attr("x", function(d) { return x(d.x0); })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0); })
+        .style("fill", function(d) {
+        
+        if (d["IDX"]==1) {
+          var a = document.getElementById("svg_object1");
+          var stop1 = a.getElementById("stop11");
+          var stop2 = a.getElementById("stop12");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient1)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        } 
+
+        if (d["IDX"]==2) {
+          var a = document.getElementById("svg_object2");
+          var stop1 = a.getElementById("stop21");
+          var stop2 = a.getElementById("stop22");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient2)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+        if (d["IDX"]==3) {
+          var a = document.getElementById("svg_object3");
+          var stop1 = a.getElementById("stop31");
+          var stop2 = a.getElementById("stop32");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient3)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+        if (d["IDX"]==4) {
+          var a = document.getElementById("svg_object4");
+          var stop1 = a.getElementById("stop41");
+          var stop2 = a.getElementById("stop42");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient4)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+        if (d["IDX"]==5) {
+          var a = document.getElementById("svg_object5");
+          var stop1 = a.getElementById("stop51");
+          var stop2 = a.getElementById("stop52");
+          stop1.setAttribute("stop-color", color(d["P1"]));
+          stop2.setAttribute("stop-color", color(d["P2"]));
+
+          if (d["Tension"]=="low") {
+
+            stop1.setAttribute("offset", "0%")
+            stop2.setAttribute("offset", "100%")
+          } else {
+            stop1.setAttribute("offset", "50%")
+            stop2.setAttribute("offset", "50%")
+          }
+          color.domain(["Tension", "II", "Ia", "Ib", "Ic", "IIn", "IIL", "Ibc", "IIP"])
+          color.range(["url(#myLinearGradient5)", "#A51C30","#293352","#4E84C4","#52854C","#8C8179","#D16103","#C3D7A4","#FFDB6D"])
+          return color(d.name)
+        }
+
+          }); // gross :( We should use a loop above!
+
+   bars.append("text")
+        .attr("x", function(d) {
+          if (d["x0"]<0) {
+            return x(d.x0-5.5);
+          } else {
+            return x(d.x1);
+          }
+        })
+        .attr("y", y.rangeBand()/2)
+        .attr("dy", "0.5em")
+        .attr("dx", "0.5em")
+        .style("font" ,"12px sans-serif")
+        .style("text-anchor", "begin")
+        .text(function(d) { // NEW
+          if (d["name"]=="Tension") {
+            d.n = ""
+          } else {
+            d.n =  d.n + "%"
+          }
+          return d.n !== 0 && (d.x1-d.x0)>3 ? d.n : ""  // NEW
+        });
+
+    var startp = svg.append("g").attr("class", "legendbox").attr("id", "mylegendbox");
+
+    d3.selectAll(".axis path")
+        .style("fill", "none")
+        .style("stroke", "#000")
+        .style("shape-rendering", "crispEdges")
+
+    d3.selectAll(".axis line")
+        .style("fill", "none")
+        .style("stroke", "#000")
+        .style("shape-rendering", "crispEdges")
+  });
+
+  }
+  </script>
+
+  <script>
+    $( document ).ready(function() {
+      var i = 1;                          //  set your counter to 1
+      function runSimulation () {         //  create a loop function
+        setTimeout(function () {    //  call a 3s setTimeout when the loop is called
+        update("simulation_data/demo_t" + i + ".csv");          //  update the chart
+          i++;                     //  increment the counter
+          if (i < 20) {            //  if the counter < 10, call the loop function
+             runSimulation();             //  ..  again which will trigger another 
+          }                        //  ..  setTimeout()
+          }, 1000)
+      }
+      runSimulation();  //  start the loop
+  });
+  </script>
+</body>
+</html>

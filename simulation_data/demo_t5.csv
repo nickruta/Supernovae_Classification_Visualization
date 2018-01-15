@@ -1,0 +1,6 @@
+IDX,Tension,2,4,11,13,Question,3,N,12
+1,low,16.0,13.0,IIn,Ia,Object 1,10,100,Tension
+2,low,17.0,13.0,II,IIn,Object 2,10,100,Tension
+3,low,14.0,13.0,Ia,IIP,Object 3,10,100,Tension
+4,low,14.0,13.0,Ic,IIL,Object 4,10,100,Tension
+5,low,15.0,13.0,IIL,IIP,Object 5,10,100,Tension
